@@ -25,11 +25,13 @@ There are a 3 options you can take when deciding how would you like to make the 
 ### DIY on your own
 
 You might have a 3D printer and you would like to print the parts for the tracker? Then do so! You can find the [3D files](https://www.printables.com/model/348574-og-star-tracker-v2) on Printables and download them from there. To assemble the tracker you will also need some additional parts. For those you can buy the [hardware kit](https://ogstartech.com/product/og-star-tracker-hw-kit/) that includes all the needed parts apart from the 3D printed ones, or you can buy them separately on your own using [the list of parts](ttps://docs.google.com/spreadsheets/d/1V04zjGSebJ5LQbSmzs-h86T6Z9E3HwVkMj2nuVYQzYs/edit?gid=0#gid=0) or the list below. To your tracker assemble you can follow the [video guide](https://www.youtube.com/watch?v=8lNT1Yxl7aw).
-<details>
-<summary>Parts for assembly</summary>
 
 > [!WARNING]  
 > If you buy the parts on your own separately, you will need the [V2 PCB](https://ogstartech.com/product/og-star-tracker-pcb-board/) to be able to use the tracker.
+
+
+<details>
+<summary>Parts for assembly</summary>
 
 |Parts                           | Quantity |
 |--------------------------------|----------|
