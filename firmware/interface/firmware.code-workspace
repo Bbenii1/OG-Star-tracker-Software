@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "C:/Users/Szlonkai Benedek/Downloads/firmware"
+		},
+		{
+			"name": "OG-star-tracker--main",
+			"path": "../../../../../Letöltések/OG-star-tracker--main"
+		},
+		{
+			"name": "OG-star-tracker--main",
+			"path": "C:/Users/Szlonkai Benedek/Downloads/OG-star-tracker--main"
+		},
+		{
+			"name": "firmware",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "firmware"
+	}
+}
