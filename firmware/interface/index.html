@@ -100,12 +100,33 @@
                 color: var(--secondary-text);
             }
 
+            #interface, #firmware {
+                margin: 0;
+            }
+
             summary {
                 font-weight: bold;
                 font-family: system-ui;
                 font-size: 16px;
-                padding-top: 20px;
                 color: var(--secondary-text);
+                cursor: pointer;
+                list-style: none;
+            }
+
+            summary::-webkit-details-marker {
+                display: none;
+            }
+
+            summary::after {
+                content: '▶';
+                display: inline-block;
+                margin-left: 8px;
+                transition: transform 0.2s ease;
+                font-size: 12px;
+            }
+
+            details[open] > summary::after {
+                transform: rotate(90deg);
             }
 
             .content {
@@ -247,10 +268,6 @@
                 /* Disable callout menu on iOS */
             }
 
-            .header svg {
-                    filter: brightness(0) saturate(100%) invert(10%) sepia(100%) saturate(8000%) hue-rotate(-5deg);
-            }
-
             #status {
                 display: block;
                 position: sticky;
@@ -300,6 +317,17 @@
                     }
                 };
                 xhr.open('GET', '/version', true);
+                xhr.send();
+            }
+
+            function requestInterfaceVersion() {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('interface').innerHTML = '%STR_INTERFACE_VERSION%: ' + this.responseText;
+                    }
+                };
+                xhr.open('GET', '/interface-version', true);
                 xhr.send();
             }
 
@@ -488,8 +516,55 @@
                 }
             }
 
+            function loadWifiSettings() {
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var settings = JSON.parse(this.responseText);
+                        document.getElementById('wifi-ssid').value = settings.ssid;
+                    }
+                };
+                xhr.open('GET', '/getWifiSettings', true);
+                xhr.send();
+            }
+
+            function saveWifiSettings() {
+                var ssid = document.getElementById('wifi-ssid').value.trim();
+                var password = document.getElementById('wifi-password').value;
+                var passwordAgain = document.getElementById('wifi-password-again').value;
+
+                if (password != passwordAgain) {
+                    document.getElementById('status').innerHTML = 'Passwords do not match';
+                    return;
+                }
+
+                if (ssid.length < 1 || ssid.length > 31) {
+                    document.getElementById('status').innerHTML = 'SSID must be 1-31 characters';
+                    return;
+                }
+                if (password.length < 8 || password.length > 63) {
+                    document.getElementById('status').innerHTML = 'Password must be 8-63 characters';
+                    return;
+                }
+
+                var url = '/setWifiSettings?ssid=' + encodeURIComponent(ssid) + '&password=' + encodeURIComponent(password);
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('status').innerHTML = '%STR_WIFI_RESTART_MSG%';
+                    } else if (this.readyState == 4) {
+                        document.getElementById('status').innerHTML = this.responseText;
+                    }
+                };
+                xhr.open('GET', url, true);
+                xhr.send();
+            }
+
             function handleLoad() {
                 requestFirmwareVersion();
+                requestInterfaceVersion();
+                loadWifiSettings();
+                document.getElementById('hemisphere-select').value = '%DEFAULT_HEMISPHERE%';
                 changeMode();
 
                 const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -619,8 +694,6 @@
                         document.getElementById('mode').dispatchEvent(new Event('change'));
                         document.getElementById('dither').dispatchEvent(new Event('change'));
                         document.getElementById('enableTracking').dispatchEvent(new Event('change'));
-
-
                     }
                 };
                 var html = '/readPreset?preset=' + preset;
@@ -634,63 +707,62 @@
         <div class="content">
             <div class="header">
                 <?xml version="1.0" encoding="UTF-8"?>
-                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128px" height="90px" viewBox="0 0 128 90" version="1.1">
-                <defs>
-                <filter id="alpha" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">
-                <feColorMatrix type="matrix" in="SourceGraphic" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
-                </filter>
-                <mask id="mask0">
-                <g filter="url(#alpha)">
-                <rect x="0" y="0" width="128" height="90" style="fill:rgb(0%,0%,0%);fill-opacity:0.960784;stroke:none;"/>
-                </g>
-                </mask>
-                <clipPath id="clip1">
-                <rect x="0" y="0" width="128" height="90"/>
-                </clipPath>
-                <g id="surface5" clip-path="url(#clip1)">
-                <path style=" stroke:none;fill-rule:evenodd;fill:rgb(99.607843%,99.607843%,99.607843%);fill-opacity:1;" d="M 41.808594 6.144531 C 46.449219 6.015625 51.070312 6.210938 55.679688 6.738281 C 57.757812 7.078125 59.605469 7.871094 61.226562 9.117188 C 57.761719 11.523438 54.527344 14.234375 51.515625 17.246094 C 49.484375 19.664062 47.703125 22.242188 46.167969 24.976562 C 38.714844 26.289062 33.101562 30.1875 29.324219 36.675781 C 25.1875 46.71875 27.367188 55.109375 35.863281 61.851562 C 41.785156 65.015625 47.992188 65.675781 54.488281 63.832031 C 61.167969 60.847656 65.199219 55.761719 66.574219 48.566406 C 67.085938 47.464844 67.816406 46.539062 68.753906 45.792969 C 68.15625 44.996094 67.429688 44.335938 66.574219 43.8125 C 65.976562 41.597656 65.84375 39.351562 66.179688 37.070312 C 69.496094 31.566406 74.316406 28.394531 80.644531 27.554688 C 81.304688 27.6875 81.964844 27.820312 82.625 27.953125 C 89.390625 42.78125 88.003906 56.789062 78.464844 69.976562 C 66.050781 83.871094 50.925781 88.035156 33.089844 82.46875 C 16.890625 75.441406 8.4375 63.085938 7.726562 45.394531 C 9.222656 23.683594 20.582031 10.601562 41.808594 6.144531 Z M 41.808594 6.144531 "/>
-                </g>
-                <mask id="mask1">
-                <g filter="url(#alpha)">
-                <rect x="0" y="0" width="128" height="90" style="fill:rgb(0%,0%,0%);fill-opacity:0.956863;stroke:none;"/>
-                </g>
-                </mask>
-                <clipPath id="clip2">
-                <rect x="0" y="0" width="128" height="90"/>
-                </clipPath>
-                <g id="surface8" clip-path="url(#clip2)">
-                <path style=" stroke:none;fill-rule:evenodd;fill:rgb(99.607843%,99.607843%,99.607843%);fill-opacity:1;" d="M 77.078125 6.144531 C 89.859375 4.851562 100.886719 8.550781 110.167969 17.246094 C 110.476562 17.820312 110.410156 18.347656 109.96875 18.832031 C 104.894531 22.125 99.875 25.496094 94.910156 28.941406 C 94.382812 29.207031 93.851562 29.207031 93.324219 28.941406 C 82.992188 23.492188 73.945312 25.144531 66.179688 33.898438 C 64.511719 36.867188 63.457031 40.039062 63.007812 43.414062 C 62.199219 44.292969 61.339844 45.085938 60.433594 45.792969 C 61.257812 46.5 62.113281 47.164062 63.007812 47.773438 C 63.785156 50.164062 63.785156 52.542969 63.007812 54.910156 C 59.261719 60.523438 54.042969 63.363281 47.355469 63.4375 C 43.054688 55.25 41.796875 46.59375 43.589844 37.46875 C 48.203125 19.96875 59.363281 9.527344 77.078125 6.144531 Z M 77.078125 6.144531 "/>
-                </g>
-                <mask id="mask2">
-                <g filter="url(#alpha)">
-                <rect x="0" y="0" width="128" height="90" style="fill:rgb(0%,0%,0%);fill-opacity:0.956863;stroke:none;"/>
-                </g>
-                </mask>
-                <clipPath id="clip3">
-                <rect x="0" y="0" width="128" height="90"/>
-                </clipPath>
-                <g id="surface11" clip-path="url(#clip3)">
-                <path style=" stroke:none;fill-rule:evenodd;fill:rgb(99.607843%,99.607843%,99.215686%);fill-opacity:1;" d="M 112.347656 21.210938 C 113.171875 21.199219 113.898438 21.464844 114.527344 22.003906 C 122.308594 33.660156 123.960938 46.148438 119.480469 59.472656 C 113.460938 73.992188 102.628906 82.449219 86.984375 84.847656 C 80.574219 85.570312 74.363281 84.777344 68.359375 82.46875 C 68.09375 82.203125 67.832031 81.9375 67.566406 81.675781 C 74.058594 77.425781 79.339844 72.007812 83.417969 65.417969 C 92.390625 64.234375 98.402344 59.410156 101.449219 50.945312 C 101.714844 50.023438 101.714844 49.097656 101.449219 48.171875 C 99.8125 49.480469 98.03125 50.535156 96.097656 51.34375 C 95.703125 51.144531 95.304688 50.945312 94.910156 50.75 C 92.742188 47.132812 90.429688 43.628906 87.976562 40.242188 C 87.460938 39.503906 87.328125 38.710938 87.578125 37.863281 C 95.882812 32.355469 104.136719 26.808594 112.347656 21.210938 Z M 112.347656 21.210938 "/>
-                </g>
-                <mask id="mask3">
-                <g filter="url(#alpha)">
-                <rect x="0" y="0" width="128" height="90" style="fill:rgb(0%,0%,0%);fill-opacity:0.996078;stroke:none;"/>
-                </g>
-                </mask>
-                <clipPath id="clip4">
-                <rect x="0" y="0" width="128" height="90"/>
-                </clipPath>
-                <g id="surface14" clip-path="url(#clip4)">
-                <path style=" stroke:none;fill-rule:evenodd;fill:rgb(90.980393%,90.980393%,90.980393%);fill-opacity:1;" d="M 58.054688 45 C 60.003906 44.855469 60.136719 45.25 58.453125 46.1875 C 58.101562 45.863281 57.96875 45.464844 58.054688 45 Z M 58.054688 45 "/>
-                </g>
-                </defs>
-                <g id="surface1">
-                <use xlink:href="#surface5" mask="url(#mask0)"/>
-                <use xlink:href="#surface8" mask="url(#mask1)"/>
-                <use xlink:href="#surface11" mask="url(#mask2)"/>
-                <use xlink:href="#surface14" mask="url(#mask3)"/>
-                <path style=" stroke:none;fill-rule:evenodd;fill:rgb(87.450981%,87.843138%,87.450981%);fill-opacity:1;" d="M 70.339844 45.394531 C 71.070312 45.453125 71.199219 45.714844 70.738281 46.1875 C 70.421875 46.007812 70.289062 45.742188 70.339844 45.394531 Z M 70.339844 45.394531 "/>
-                </g>
+                <svg xmlns="http://www.w3.org/2000/svg" width="128px" height="90px" viewBox="0 0 128 90">
+                    <defs>
+                        <filter id="alpha" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">
+                        <feColorMatrix type="matrix" in="SourceGraphic"
+                            values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
+                        </filter>
+
+                        <mask id="mask0">
+                        <g filter="url(#alpha)">
+                            <rect width="128" height="90" fill="black" fill-opacity="0.96"/>
+                        </g>
+                        </mask>
+
+                        <mask id="mask1">
+                        <g filter="url(#alpha)">
+                            <rect width="128" height="90" fill="black" fill-opacity="0.956"/>
+                        </g>
+                        </mask>
+
+                        <mask id="mask2">
+                        <g filter="url(#alpha)">
+                            <rect width="128" height="90" fill="black" fill-opacity="0.956"/>
+                        </g>
+                        </mask>
+
+                        <mask id="mask3">
+                        <g filter="url(#alpha)">
+                            <rect width="128" height="90" fill="black" fill-opacity="0.996"/>
+                        </g>
+                        </mask>
+
+                        <g id="surface5">
+                        <path fill="#B10000" d="M41.808594 6.144531 C46.449219 6.015625 51.070312 6.210938 55.679688 6.738281 C57.757812 7.078125 59.605469 7.871094 61.226562 9.117188 C57.761719 11.523438 54.527344 14.234375 51.515625 17.246094 C49.484375 19.664062 47.703125 22.242188 46.167969 24.976562 C38.714844 26.289062 33.101562 30.1875 29.324219 36.675781 C25.1875 46.71875 27.367188 55.109375 35.863281 61.851562 C41.785156 65.015625 47.992188 65.675781 54.488281 63.832031 C61.167969 60.847656 65.199219 55.761719 66.574219 48.566406 C67.085938 47.464844 67.816406 46.539062 68.753906 45.792969 C68.15625 44.996094 67.429688 44.335938 66.574219 43.8125 C65.976562 41.597656 65.84375 39.351562 66.179688 37.070312 C69.496094 31.566406 74.316406 28.394531 80.644531 27.554688 C81.304688 27.6875 81.964844 27.820312 82.625 27.953125 C89.390625 42.78125 88.003906 56.789062 78.464844 69.976562 C66.050781 83.871094 50.925781 88.035156 33.089844 82.46875 C16.890625 75.441406 8.4375 63.085938 7.726562 45.394531 C9.222656 23.683594 20.582031 10.601562 41.808594 6.144531 Z"/>
+                        </g>
+
+                        <g id="surface8">
+                        <path fill="#B10000" d="M77.078125 6.144531 C89.859375 4.851562 100.886719 8.550781 110.167969 17.246094 C110.476562 17.820312 110.410156 18.347656 109.96875 18.832031 C104.894531 22.125 99.875 25.496094 94.910156 28.941406 C94.382812 29.207031 93.851562 29.207031 93.324219 28.941406 C82.992188 23.492188 73.945312 25.144531 66.179688 33.898438 C64.511719 36.867188 63.457031 40.039062 63.007812 43.414062 C62.199219 44.292969 61.339844 45.085938 60.433594 45.792969 C61.257812 46.5 62.113281 47.164062 63.007812 47.773438 C63.785156 50.164062 63.785156 52.542969 63.007812 54.910156 C59.261719 60.523438 54.042969 63.363281 47.355469 63.4375 C43.054688 55.25 41.796875 46.59375 43.589844 37.46875 C48.203125 19.96875 59.363281 9.527344 77.078125 6.144531 Z"/>
+                        </g>
+
+                        <g id="surface11">
+                        <path fill="#B10000" d="M112.347656 21.210938 C113.171875 21.199219 113.898438 21.464844 114.527344 22.003906 C122.308594 33.660156 123.960938 46.148438 119.480469 59.472656 C113.460938 73.992188 102.628906 82.449219 86.984375 84.847656 C80.574219 85.570312 74.363281 84.777344 68.359375 82.46875 C68.09375 82.203125 67.832031 81.9375 67.566406 81.675781 C74.058594 77.425781 79.339844 72.007812 83.417969 65.417969 C92.390625 64.234375 98.402344 59.410156 101.449219 50.945312 C101.714844 50.023438 101.714844 49.097656 101.449219 48.171875 C99.8125 49.480469 98.03125 50.535156 96.097656 51.34375 C95.703125 51.144531 95.304688 50.945312 94.910156 50.75 C92.742188 47.132812 90.429688 43.628906 87.976562 40.242188 C87.460938 39.503906 87.328125 38.710938 87.578125 37.863281 C95.882812 32.355469 104.136719 26.808594 112.347656 21.210938 Z"/>
+                        </g>
+
+                        <g id="surface14">
+                        <path fill="#B10000" d="M58.054688 45 C60.003906 44.855469 60.136719 45.25 58.453125 46.1875 C58.101562 45.863281 57.96875 45.464844 58.054688 45 Z"/>
+                        </g>
+                    </defs>
+
+                    <g>
+                        <use href="#surface5" mask="url(#mask0)"/>
+                        <use href="#surface8" mask="url(#mask1)"/>
+                        <use href="#surface11" mask="url(#mask2)"/>
+                        <use href="#surface14" mask="url(#mask3)"/>
+
+                        <path fill="#B10000" d="M70.339844 45.394531 C71.070312 45.453125 71.199219 45.714844 70.738281 46.1875 C70.421875 46.007812 70.289062 45.742188 70.339844 45.394531 Z"/>
+                    </g>
                 </svg>
 
             </div>
@@ -725,16 +797,11 @@
                 <div class="grid">
                     <h3>%STR_SPEED_MULTIPLIER%:</h3>
                     <select aria-label="slew" id='slew-select' onchange="checkCustomSpeedSlew();">
-                        <option value='2'>2 x %STR_TRACKING_RATE%</option>
-                        <option value='8'>8</option>
-                        <option value='16'>16</option>
-                        <option value='32'>32</option>
+                        <option value='2'>2</option>
+                        <option value='10'>10</option>
                         <option value='50'>50</option>
-                        <option value='64'>64</option>
                         <option value='100'>100</option>
-                        <option value='128'>128</option>
                         <option value='200'>200</option>
-                        <option value='256'>256</option>
                         <option value='400'>400</option>
                         <option value='custom'>%STR_CUSTOM%</option>
                     </select>
@@ -754,16 +821,11 @@
                 <div class="grid">
                     <h3>%STR_SPEED_MULTIPLIER%:</h3>
                     <select aria-label="goto_ra" id='gotora-speed-select' onchange="checkCustomSpeedGoToRA();">
-                        <option value='2'>2 x %STR_TRACKING_RATE%</option>
-                        <option value='8'>8</option>
-                        <option value='16'>16</option>
-                        <option value='32'>32</option>
+                        <option value='2'>2</option>
+                        <option value='10'>10</option>
                         <option value='50'>50</option>
-                        <option value='64'>64</option>
                         <option value='100'>100</option>
-                        <option value='128'>128</option>
                         <option value='200'>200</option>
-                        <option value='256'>256</option>
                         <option value='400'>400</option>
                         <option value='custom'>%STR_CUSTOM%</option>
                     </select>
@@ -777,19 +839,19 @@
                     <h3>%STR_GOTO_RA_CURRENT%</h3>
                     <h3>%STR_GOTO_RA_TARGET%</h3>
 
-                    <h3>Hours:</h3>
+                    <h3>%STR_HOURS%:</h3>
                     <input type="number" id="currentHours" placeholder="0" min="0" max="23"
                         onchange="calculateRAInput();">
                     <input type="number" id="targetHours" placeholder="0" min="0" max="23"
                         onchange="calculateRAInput();">
 
-                    <h3>Minutes:</h3>
+                    <h3>%STR_MINUTES%:</h3>
                     <input type="number" id="currentMinutes" placeholder="0" min="0" max="59"
                         onchange="calculateRAInput();">
                     <input type="number" id="targetMinutes" placeholder="0" min="0" max="59"
                         onchange="calculateRAInput();">
 
-                    <h3>Seconds:</h3>
+                    <h3>%STR_SECONDS%:</h3>
                     <input type="number" id="currentSeconds" placeholder="0" min="0" max="59"
                         onchange="calculateRAInput();">
                     <input type="number" id="targetSeconds" placeholder="0" min="0" max="59"
@@ -929,13 +991,34 @@
                     </div>
                 </div>
             </div>
+            
+            <details class="card">
+                <summary>%STR_SETTINGS%</summary>
+                <div class="grid">
+                    <div class="language-selector">
+                        <h3>%STR_LANGUAGE%:</h3>
+                        <select id="language-select" onchange="changeLanguage()">%LANG_SELECT%</select>
+                    </div>
+                    <div>
+                        <h3>%STR_WIFI_SSID%:</h3>
+                        <input type='text' id='wifi-ssid' maxlength='31' placeholder='SSID'>
+                    </div>
+                    <div>
+                        <h3>%STR_WIFI_PASSWORD%:</h3>
+                        <input type='password' id='wifi-password' minlength='8' maxlength='63' placeholder='••••••••'>
+                    </div>
+                    <div>
+                        <h3>%STR_WIFI_PASSWORD_AGAIN%:</h3>
+                        <input type='password' id='wifi-password-again' minlength='8' maxlength='63' placeholder='••••••••'>
+                    </div>
+                    <button type="button" onclick="saveWifiSettings()">%STR_SAVE_RESTART%</button>
+                </div>
+            </details>
+
             <div id='status'>%STR_STATUS_MSG%</div>
 
-            <div class="language-selector">
-                <select id="language-select" onchange="changeLanguage()">%LANG_SELECT%</select>
-            </div>
-
             <h4 id='firmware'>%STR_FIRMWARE_VERSION%: </h4>
+            <h4 id='interface'>%STR_INTERFACE_VERSION%: </h4>
         </div>
     </body>
 </html>

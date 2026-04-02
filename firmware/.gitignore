@@ -6,3 +6,7 @@
 .vscode/ipch
 compile_commands.json
 wifi_config.h
+build/
+interface/firmware.code-workspace
+compile_commands.json
+firmware.code-workspace

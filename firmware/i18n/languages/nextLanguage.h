@@ -94,6 +94,8 @@ const char* nextLangHTMLStrings[numberOfHTMLStrings] = {
     "", // STR_NO_FRAMES
     "", // STR_PAN_ANGLE
     "", // STR_HOURS
+    "", // STR_MINUTES
+    "", // STR_SECONDS
     "", // STR_PAN_DIRECTION
     "", // STR_LEFT
     "", // STR_RIGHT
@@ -117,7 +119,14 @@ const char* nextLangHTMLStrings[numberOfHTMLStrings] = {
     "", // STR_CAPTURE_TIME
     "", // STR_STATUS
     "", // STR_STATUS_MSG
-    ""  // STR_FIRMWARE_VERSION
+    "", // STR_FIRMWARE_VERSION
+    "", // STR_SETTINGS
+    "", // STR_LANGUAGE
+    "", // STR_WIFI_SSID
+    "", // STR_WIFI_PASSWORD
+    "", // STR_WIFI_PASSWORD_AGAIN
+    "", // STR_SAVE_RESTART
+    "" // STR_WIFI_RESTART_MSG
 };
 
 #endif

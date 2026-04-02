@@ -90,10 +90,12 @@ const char* chineseLangHTMLStrings[numberOfHTMLStrings] = {
     "Number of Frames",         // STR_FRAMES
     "nº of frames",             // STR_NO_FRAMES
     "Pan Angle",                // STR_PAN_ANGLE
-    "hours (Ex. 6)",            // STR_HOURS
+    "小时",                     // STR_HOURS
+    "分钟",                     // STR_MINUTES
+    "秒",                       // STR_SECONDS
     "Pan Direction",            // STR_PAN_DIRECTION
-    "Left",                     // STR_LEFT
-    "Right",                    // STR_RIGHT
+    "向左",                     // STR_LEFT
+    "向右",                     // STR_RIGHT
     "Goto RA Control",          // STR_GOTO_RA_CONTROL
     "Goto RA Current",          // STR_GOTO_RA_CURRENT
     "Goto RA Target",           // STR_GOTO_RA_TARGET
@@ -116,7 +118,15 @@ const char* chineseLangHTMLStrings[numberOfHTMLStrings] = {
     "Capture Time",            // STR_CAPTURE_TIME
     "状态",                    // STR_STATUS
     "就绪",                    // STR_STATUS_MSG
-    "固件版本"                 // STR_FIRMWARE_VERSION
+    "固件版本",                 // STR_FIRMWARE_VERSION
+    "界面版本",                 // STR_INTERFACE_VERSION
+    "设置",                     // STR_SETTINGS
+    "WiFi名称 (SSID)",          // STR_WIFI_SSID
+    "WiFi密码",                 // STR_WIFI_PASSWORD
+    "WiFi密码",                 // STR_WIFI_PASSWORD_AGAIN
+    "语言",                     // STR_LANGUAGE
+    "保存并重启",               // STR_SAVE_RESTART
+    "正在使用新WiFi设置重启..." // STR_WIFI_RESTART_MSG
 };
 
 #endif

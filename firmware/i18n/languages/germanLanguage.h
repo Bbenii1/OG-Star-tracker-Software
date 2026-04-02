@@ -58,7 +58,7 @@ const char* germanLangHTMLStrings[numberOfHTMLStrings] = {
     "Hemisphäre",                                   // STR_HEMISPHERE
     "Nord",                                         // STR_NORTH
     "Süd",                                          // STR_SOUTH
-    "Verfolgungsrate",                              // STR_TRACKING_RATE
+    "Verfolgung",                                   // STR_TRACKING_RATE
     "Sidereal",                                     // STR_SIDEREAL
     "Solar",                                        // STR_SOLAR
     "Lunar",                                        // STR_LUNAR
@@ -90,7 +90,9 @@ const char* germanLangHTMLStrings[numberOfHTMLStrings] = {
     "Anzahl der Bilder",                            // STR_FRAMES
     "nº der Bilder",                                // STR_NO_FRAMES
     "Schwenkwinkel",                                // STR_PAN_ANGLE
-    "in Stunden (z.B. 6)",                          // STR_HOURS
+    "Stunden",                                      // STR_HOURS
+    "Minuten",                                      // STR_MINUTES
+    "Sekunden",                                     // STR_SECONDS
     "Schwenkrichtung",                              // STR_PAN_DIRECTION
     "Links",                                        // STR_LEFT
     "Rechts",                                       // STR_RIGHT
@@ -116,7 +118,15 @@ const char* germanLangHTMLStrings[numberOfHTMLStrings] = {
     "Aufnahmezeit",                                       // STR_CAPTURE_TIME
     "Status",                                             // STR_STATUS
     "Bereit",                                             // STR_STATUS_MSG
-    "Firmware Version"                                    // STR_FIRMWARE_VERSION
+    "Firmware Version",                                    // STR_FIRMWARE_VERSION
+    "Interface Version",                                   // STR_INTERFACE_VERSION
+    "Einstellungen",                                       // STR_SETTINGS
+    "Sprache",                                             // STR_LANGUAGE
+    "WLAN-Name (SSID)",                                    // STR_WIFI_SSID
+    "WLAN-Passwort",                                       // STR_WIFI_PASSWORD
+    "WLAN-Passwort Wiederholen",                           // STR_WIFI_PASSWORD_AGAIN
+    "SPEICHERN & NEUSTART",                                // STR_SAVE_RESTART
+    "Neustart mit neuen WLAN-Einstellungen..."             // STR_WIFI_RESTART_MSG
 };
 
 #endif

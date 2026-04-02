@@ -22,6 +22,9 @@ void handleAbortCapture();
 void handleAbortGoToRA();
 void handleStatusRequest();
 void handleVersion();
+void handleInterfaceVersion();
+void handleGetWifiSettings();
+void handleSetWifiSettings();
 
 // Setup function
 void setupWireless();

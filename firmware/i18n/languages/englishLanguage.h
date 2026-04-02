@@ -90,7 +90,9 @@ const char* englishLangHTMLStrings[numberOfHTMLStrings] = {
     "Number of Frames",              // STR_FRAMES
     "nº of frames",                  // STR_NO_FRAMES
     "Pan Angle",                     // STR_PAN_ANGLE
-    "hours (Ex. 6)",                 // STR_HOURS
+    "Hours",                         // STR_HOURS
+    "Minutes",                       // STR_MINUTES
+    "Seconds",                       // STR_SECONDS
     "Pan Direction",                 // STR_PAN_DIRECTION
     "Left",                          // STR_LEFT
     "Right",                         // STR_RIGHT
@@ -116,7 +118,15 @@ const char* englishLangHTMLStrings[numberOfHTMLStrings] = {
     "Capture Time",                       // STR_CAPTURE_TIME
     "Status",                             // STR_STATUS
     "Ready",                              // STR_STATUS_MSG
-    "Firmware Version"                    // STR_FIRMWARE_VERSION
+    "Firmware Version",                    // STR_FIRMWARE_VERSION
+    "Interface Version",                   // STR_INTERFACE_VERSION
+    "Settings",                            // STR_SETTINGS
+    "Language",                            // STR_LANGUAGE
+    "WiFi Name (SSID)",                    // STR_WIFI_SSID
+    "WiFi Password",                       // STR_WIFI_PASSWORD
+    "WiFi Password Again",                 // STR_WIFI_PASSWORD_AGAIN
+    "SAVE & RESTART",                      // STR_SAVE_RESTART
+    "Restarting with new WiFi settings..." // STR_WIFI_RESTART_MSG
 };
 
 #endif

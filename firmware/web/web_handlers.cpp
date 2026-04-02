@@ -24,6 +24,10 @@ extern Axis ra_axis;
 extern Intervalometer intervalometer;
 extern HardwareTimer slewTimeOut;
 
+// Runtime WiFi credentials (loaded from EEPROM or compile-time defaults)
+static char runtimeSSID[WIFI_SSID_MAX_LEN] = {0};
+static char runtimePassword[WIFI_PASSWORD_MAX_LEN] = {0};
+
 extern const uint8_t interface_index_html_start[] asm("_binary_interface_index_html_start");
 extern const uint8_t interface_index_html_end[] asm("_binary_interface_index_html_end");
 
@@ -55,6 +59,7 @@ void handleRoot()
         buffer[0] = '\0';
     }
     htmlString.replace("%LANG_SELECT%", selectString);
+    htmlString.replace("%DEFAULT_HEMISPHERE%", String(c_DIRECTION));
     server.send(200, MIME_TYPE_HTML, htmlString);
 }
 
@@ -429,16 +434,110 @@ void handleStatusRequest()
 
 void handleVersion()
 {
-    server.send(200, MIME_TYPE_TEXT, (String) INTERNAL_VERSION);
+    server.send(200, MIME_TYPE_TEXT, (String) FIRMWARE_VERSION);
+}
+
+void handleInterfaceVersion()
+{
+    server.send(200, MIME_TYPE_TEXT, (String) INTERFACE_VERSION);
+}
+
+void handleGetWifiSettings()
+{
+    JsonDocument doc;
+    doc["ssid"] = runtimeSSID;
+    String json;
+    serializeJson(doc, json);
+    server.send(200, MIME_APPLICATION_JSON, json);
+}
+
+void handleSetWifiSettings()
+{
+    String newSSID = server.arg("ssid");
+    String newPassword = server.arg("password");
+
+    // Validate SSID length
+    if (newSSID.length() < 1 || newSSID.length() >= WIFI_SSID_MAX_LEN)
+    {
+        server.send(400, MIME_TYPE_TEXT, "SSID must be 1-31 characters");
+        return;
+    }
+
+    // Validate password length (AP mode requires 8+ chars)
+    if (newPassword.length() < 8 || newPassword.length() >= WIFI_PASSWORD_MAX_LEN)
+    {
+        server.send(400, MIME_TYPE_TEXT, "Password must be 8-63 characters");
+        return;
+    }
+
+    // Write magic marker
+    EEPROM.write(WIFI_EEPROM_MARKER_ADDR, 0xAB);
+    EEPROM.write(WIFI_EEPROM_MARKER_ADDR + 1, 0xCD);
+
+    // Write SSID (null-terminated)
+    for (int i = 0; i < WIFI_SSID_MAX_LEN; i++)
+    {
+        EEPROM.write(WIFI_SSID_EEPROM_ADDR + i,
+                     i < (int) newSSID.length() ? newSSID[i] : 0);
+    }
+
+    // Write password (null-terminated)
+    for (int i = 0; i < WIFI_PASSWORD_MAX_LEN; i++)
+    {
+        EEPROM.write(WIFI_PASSWORD_EEPROM_ADDR + i,
+                     i < (int) newPassword.length() ? newPassword[i] : 0);
+    }
+
+    EEPROM.commit();
+    print_out("WiFi credentials saved. Restarting...");
+    server.send(200, MIME_TYPE_TEXT, "OK");
+
+    // Delay briefly to let the HTTP response be sent, then restart
+    vTaskDelay(1000);
+    ESP.restart();
+}
+
+static void loadWifiCredentialsFromEEPROM()
+{
+    // Check for magic marker
+    uint8_t marker0 = EEPROM.read(WIFI_EEPROM_MARKER_ADDR);
+    uint8_t marker1 = EEPROM.read(WIFI_EEPROM_MARKER_ADDR + 1);
+
+    if (marker0 == 0xAB && marker1 == 0xCD)
+    {
+        // Read saved credentials
+        for (int i = 0; i < WIFI_SSID_MAX_LEN; i++)
+            runtimeSSID[i] = (char) EEPROM.read(WIFI_SSID_EEPROM_ADDR + i);
+        runtimeSSID[WIFI_SSID_MAX_LEN - 1] = '\0';
+
+        for (int i = 0; i < WIFI_PASSWORD_MAX_LEN; i++)
+            runtimePassword[i] = (char) EEPROM.read(WIFI_PASSWORD_EEPROM_ADDR + i);
+        runtimePassword[WIFI_PASSWORD_MAX_LEN - 1] = '\0';
+
+        print_out("WiFi: Using saved credentials (SSID: %s)", runtimeSSID);
+    }
+    else
+    {
+        // Use compile-time defaults
+        strncpy(runtimeSSID, WIFI_SSID, WIFI_SSID_MAX_LEN - 1);
+        runtimeSSID[WIFI_SSID_MAX_LEN - 1] = '\0';
+        strncpy(runtimePassword, WIFI_PASSWORD, WIFI_PASSWORD_MAX_LEN - 1);
+        runtimePassword[WIFI_PASSWORD_MAX_LEN - 1] = '\0';
+
+        print_out("WiFi: Using default credentials (SSID: %s)", runtimeSSID);
+    }
 }
 
 void setupWireless()
 {
+    // Load WiFi credentials from EEPROM (or fall back to compile-time defaults)
+    loadWifiCredentialsFromEEPROM();
+
 #ifdef AP_MODE
     WiFi.mode(WIFI_MODE_AP);
-    WiFi.softAP(WIFI_SSID, WIFI_PASSWORD);
+    WiFi.softAP(runtimeSSID, runtimePassword);
     vTaskDelay(500);
-    print_out("Creating Wifi Network");
+    print_out("Creating Wifi Network: %s", runtimeSSID);
 
     // ANDROID 10 WORKAROUND==================================================
     // set new WiFi configurations
@@ -457,7 +556,7 @@ void setupWireless()
     // ANDROID 10 WORKAROUND==================================================
 #else
     WiFi.mode(WIFI_MODE_STA); // Set ESP32 in station mode
-    WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+    WiFi.begin(runtimeSSID, runtimePassword);
     print_out("Connecting to Network in STA mode");
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -478,7 +577,10 @@ void setupWireless()
     server.on("/gotoRA", HTTP_GET, handleGotoRA);
     server.on("/abort-goto-ra", HTTP_GET, handleAbortGoToRA);
     server.on("/version", HTTP_GET, handleVersion);
+    server.on("/interface-version", HTTP_GET, handleInterfaceVersion);
     server.on("/setlang", HTTP_GET, handleSetLanguage);
+    server.on("/getWifiSettings", HTTP_GET, handleGetWifiSettings);
+    server.on("/setWifiSettings", HTTP_GET, handleSetWifiSettings);
 
     // Start the server
     server.begin();
@@ -499,9 +601,9 @@ void setupWireless()
 
     MDNS.addService("http", "tcp", WEBSERVER_PORT);
     MDNS.addServiceTxt("http", "tcp", "ogtracker", "1");
-    MDNS.addServiceTxt("http", "tcp", "version", BUILD_VERSION);
+    MDNS.addServiceTxt("http", "tcp", "version", FIRMWARE_VERSION);
 
     MDNS.addService("ogtracker", "tcp", WEBSERVER_PORT);
-    MDNS.addServiceTxt("ogtracker", "tcp", "version", BUILD_VERSION);
+    MDNS.addServiceTxt("ogtracker", "tcp", "version", FIRMWARE_VERSION);
 }
 

@@ -60,7 +60,6 @@ void setup()
     pinMode(EN12_n, OUTPUT);
     digitalWrite(AXIS1_STEP, LOW);
     digitalWrite(EN12_n, LOW);
-    // handleExposureSettings();
 
     // Initialize Wifi and web server
     setupWireless();

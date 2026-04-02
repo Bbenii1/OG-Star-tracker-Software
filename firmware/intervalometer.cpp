@@ -1,5 +1,3 @@
-#include "esp32-hal-gpio.h"
-// #include <cstdlib>
 #include "intervalometer.h"
 #include "uart.h"
 
@@ -314,10 +312,6 @@ template <class T> int Intervalometer::writeObjectToEEPROM(int address, const T&
     unsigned int i;
     for (i = 0; i < sizeof(object); i++)
     {
-        // print_out("Address = ");
-        // print_out(address);
-        // print_out(", Data = ");
-        // print_out(*p);
         EEPROM.write(address++, *p++);
         EEPROM.commit();
     }
@@ -331,10 +325,6 @@ template <class T> int Intervalometer::readObjectFromEEPROM(int address, T& obje
     unsigned int i;
     for (i = 0; i < sizeof(object); i++)
     {
-        // print_out("Address = ");
-        // print_out(address);
-        // print_out(", Data = ");
-        // print_out(EEPROM.read(address), HEX);
         *p++ = EEPROM.read(address++);
     }
     return i;

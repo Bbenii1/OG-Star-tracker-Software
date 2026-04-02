@@ -18,7 +18,9 @@
  * Blanchon*/
 /*****USER DEFINED*****/
 // AP mode by default: ESP32 will create a wifi network which you can connect to
-#define c_DIRECTION 1                // 1 is for north hemisphere and 0 for south hemisphere
+#ifndef c_DIRECTION
+#define c_DIRECTION                // 1 is for north hemisphere and 0 for south hemisphere
+#endif
 #define RA_INVERT_DIR_PIN 1          // if need to invert direction pin set to 1
 #define DEC_INVERT_DIR_PIN 0         // if need to invert direction pin set to 1
 #define DEFAULT_ENABLE_TRACKING 1    // set to 1 to enable tracking at startup
@@ -40,10 +42,10 @@
 #endif
 // Configure the wifi settings if you are not using platformio
 #ifndef WIFI_SSID
-#define WIFI_SSID "Beni's OG Star Tracker" // change to your SSID
+#define WIFI_SSID "" // change to your SSID
 #endif
 #ifndef WIFI_PASSWORD
-#define WIFI_PASSWORD "Beni2006" // change to your password, must be 8+ characters
+#define WIFI_PASSWORD "" // change to your password, must be 8+ characters
 #endif
 // If you are using AP mode, you can access the website using the below URL
 #ifndef MDNS_NAME
@@ -53,7 +55,6 @@
 #define WEBSERVER_PORT 80
 #endif
 
-// try to update every time there is breaking change
 #ifndef INTERNAL_VERSION
 #define INTERNAL_VERSION 7
 #endif
@@ -87,6 +88,13 @@
 #define STATUS_LED 26 // (Red)
 #define LANG_EEPROM_ADDR 0
 #define PRESETS_EEPROM_START_LOCATION 1
+
+// WiFi credentials EEPROM layout (after presets: 1 + 10*28 = 281)
+#define WIFI_EEPROM_MARKER_ADDR 281    // 2 bytes: magic marker 0xAB, 0xCD
+#define WIFI_SSID_EEPROM_ADDR 283      // 32 bytes: null-terminated SSID
+#define WIFI_PASSWORD_EEPROM_ADDR 315  // 64 bytes: null-terminated password
+#define WIFI_SSID_MAX_LEN 32
+#define WIFI_PASSWORD_MAX_LEN 64
 
 // Stepper driver pins -- intended for TMC2209 for now
 // AXIS 1 - RA
