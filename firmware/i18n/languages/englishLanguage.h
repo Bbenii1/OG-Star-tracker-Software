@@ -121,10 +121,10 @@ const char* englishLangHTMLStrings[numberOfHTMLStrings] = {
     "Firmware Version",                    // STR_FIRMWARE_VERSION
     "Interface Version",                   // STR_INTERFACE_VERSION
     "Settings",                            // STR_SETTINGS
-    "Language",                            // STR_LANGUAGE
     "WiFi Name (SSID)",                    // STR_WIFI_SSID
     "WiFi Password",                       // STR_WIFI_PASSWORD
     "WiFi Password Again",                 // STR_WIFI_PASSWORD_AGAIN
+    "Language",                            // STR_LANGUAGE
     "SAVE & RESTART",                      // STR_SAVE_RESTART
     "Restarting with new WiFi settings..." // STR_WIFI_RESTART_MSG
 };
