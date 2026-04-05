@@ -121,10 +121,10 @@ const char* nextLangHTMLStrings[numberOfHTMLStrings] = {
     "", // STR_STATUS_MSG
     "", // STR_FIRMWARE_VERSION
     "", // STR_SETTINGS
-    "", // STR_LANGUAGE
     "", // STR_WIFI_SSID
     "", // STR_WIFI_PASSWORD
     "", // STR_WIFI_PASSWORD_AGAIN
+    "", // STR_LANGUAGE
     "", // STR_SAVE_RESTART
     "" // STR_WIFI_RESTART_MSG
 };
